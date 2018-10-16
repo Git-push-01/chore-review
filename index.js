@@ -1,85 +1,73 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const choresURL = "http://localhost:3000/chores"
-  const choreList = document.getElementById("chore-list")
-  let form = document.getElementById("new-chore-form")
+  const choreList = document.querySelector('#chore-list')
+  const form = document.querySelector('#new-chore-form')
   form.addEventListener("submit", createAChore)
   fetchChores()
 
   function fetchChores(){
-    fetch(choresURL)
+    fetch("http://localhost:3000/chores")
     .then(res => res.json())
-    .then(renderChores)
+    .then(chores => chores.forEach(chore => addChoreToPage(chore)))
   }
 
-  function renderChores(chores){
-    chores.forEach(chore => renderChore(chore))
-  }
-
-  function renderChore(chore){
-    let newDiv = document.createElement("div")
-    newDiv.className = "chore-card";
-    newDiv.innerHTML = `<button class="delete-button" data-id="${chore.id}">X</button>
-    <h3>${chore.title}</h3><p>${chore.duration}</p><input value="${chore.priority}"></input><button class="edit-button" id="${chore.id}">Edit</button>`
+  function addChoreToPage(chore){
+    const newDiv = document.createElement("div")
+    newDiv.className = "chore-card"
+    newDiv.innerHTML = `<button data-id=${chore.id} class="delete-button">X</button><h3>${chore.title}</h3><p>Duration: ${chore.duration}</p><input value=${chore.priority}></input><button class="edit-button" id="${chore.id}">Edit</button>`
     choreList.append(newDiv)
     let deleteButton = document.querySelector(`button[data-id = "${chore.id}"]`)
     deleteButton.addEventListener("click", deleteChore)
     let editButton = document.getElementById(`${chore.id}`)
-    editButton.addEventListener("click", editAChore)
+    editButton.addEventListener("click", updateChore)
   }
 
   function createAChore(event){
     event.preventDefault()
-    let title = event.target.title.value
-    let duration = event.target.duration.value
-    let priority = event.target.priority.value
-    console.log(title, duration, priority)
-    let data = {
-      // title: title
-      title,
-      duration,
-      priority
-    }
-    fetch(choresURL, {
+    console.log("hit form submit")
+    const title = event.target.title.value
+    const duration = event.target.duration.value
+    const priority = event.target.priority.value
+    fetch("http://localhost:3000/chores", {
       method: "POST",
-      body: JSON.stringify(data),
-      headers: {"Content-Type": "application/json"}
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        title,
+        duration,
+        priority
+      })
     })
     .then(res => res.json())
-    .then(renderChore)
+    .then(addChoreToPage)
   }
 
-    function deleteChore(event){
-      let choreDiv = event.target.parentElement
-      console.log(choreDiv)
-      let id = event.target.getAttribute("data-id")
-      fetch(choresURL + `/${id}`, {
-        method: "DELETE",
-        headers:{"Content-Type": "application/json"}
-      })
-      .then(choreDiv.remove())
-    }
+  function deleteChore(event){
+    console.dir(event.target.parentElement)
+    let id = event.target.dataset.id
+    // let id = event.target.getAttribute("data-id")
+    event.target.parentElement.remove()
+    fetch(`http://localhost:3000/chores/${id}`, {
+      method: "DELETE"
+    })
+  }
 
-    async function editAChore(event){
-      let choreDiv = event.target.parentElement
-      let input = choreDiv.getElementsByTagName("input")[0]
-      console.log(input)
-      console.log(choreDiv)
-      let id = event.target.getAttribute("id")
-      console.log(id)
-      event.preventDefault()
-      let oldChore =  await fetch(choresURL + `/${id}`).then(res => res.json())
-      let newChore = {...oldChore, priority: input.value}
-      console.log("newCHore", newChore)
-      console.log(oldChore)
-      console.log("hitting edit")
-      fetch(choresURL + `/${id}`, {
-        method: "PATCH",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(newChore)
-      })
-      // .then(res)
-      // .then(console.log)
-    }
+  async function updateChore(event){
+    let id = event.target.id
+    console.log(id)
+    let parent = event.target.parentNode
+    let newPriority = parent.querySelector('input').value
+    console.dir(newPriority)
+    console.log(event.target)
+    const oldChore = await fetch(`http://localhost:3000/chores/${id}`).then(res => res.json())
+    const newChore = {...oldChore, priority: newPriority}
+    console.log(oldChore)
+    fetch(`http://localhost:3000/chores/${id}`, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({priority: newPriority})
+    })
+  }
+
+
 
 
 

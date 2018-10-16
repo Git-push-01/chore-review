@@ -1,16 +1,26 @@
 {
   "chores": [
     {
-      "title": "test",
-      "priority": "medium",
-      "duration": "1 hour",
-      "id": 4
+      "priority": "low",
+      "id": 9
     },
     {
-      "title": "walk the cat",
-      "duration": "6 hours",
-      "priority": "last time",
-      "id": 8
+      "title": "test",
+      "duration": "3 hours",
+      "priority": "high",
+      "id": 10
+    },
+    {
+      "title": "hey there",
+      "duration": "2 hours",
+      "priority": "low importance",
+      "id": 11
+    },
+    {
+      "title": "walk the sloth",
+      "duration": "5 hours",
+      "priority": "high",
+      "id": 12
     }
   ]
 }
